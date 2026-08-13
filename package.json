@@ -19,6 +19,8 @@
     "scripts/build-client.js",
     "scripts/set-window-icon.ps1",
     "README.md",
+    "README.zh.md",
+    "README.i18n.yaml",
     "CHANGELOG.md"
   ],
   "engines": {
