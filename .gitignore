@@ -1,0 +1,6 @@
+node_modules/
+.npm-cache/
+.npx-cache/
+.claude/
+.edge-headless*/
+lib/client.raw.js

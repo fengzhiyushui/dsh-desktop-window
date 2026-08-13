@@ -1,0 +1,6 @@
+# dsh-desktop-window 组合层：一个双面插件行。
+# Host 半边（包主入口 lib/index.js）负责拉起独立应用窗口并注册 HTTP 路由；
+# package.json 的 dsh.client 声明让 modules 扫描器把 ./client 打进浏览器插件名单。
+- insert:
+    - id: desktop-window
+      name: dsh-desktop-window
