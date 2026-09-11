@@ -1,7 +1,7 @@
 {
   "name": "dsh-desktop-window",
-  "version": "0.1.0",
-  "description": "DSH 桌面窗口插件：以独立应用窗口打开 DeepSeek Harness Web UI（自动开窗 + 会话头部手动开关 + 设置页自动开窗开关）",
+  "version": "0.4.0",
+  "description": "DSH desktop-window plugin: opens the DeepSeek Harness Web UI in a standalone app window (auto-open + session-header toggle + settings switch)",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -12,16 +12,21 @@
   },
   "files": [
     "lib/index.js",
+    "lib/window-spec.js",
     "lib/client.js",
     "cordis.patch.yml",
     "assets",
     "src/client.js",
     "scripts/build-client.js",
-    "scripts/set-window-icon.ps1",
     "README.md",
     "README.zh.md",
     "README.i18n.yaml",
-    "CHANGELOG.md"
+    "DEVELOPMENT.md",
+    "DEVELOPMENT.zh.md",
+    "ADAPTATION.md",
+    "ADAPTATION.zh.md",
+    "CHANGELOG.md",
+    "LICENSE"
   ],
   "engines": {
     "node": ">=22"
@@ -31,7 +36,8 @@
     "dsh-plugin",
     "deepseek-harness",
     "desktop",
-    "window"
+    "window",
+    "standalone-app-window"
   ],
   "dsh": {
     "bundle": {
@@ -56,7 +62,8 @@
     "@deepseek-ai/dsh-client-ui-settings-general": ">=0.1.0-rc.6"
   },
   "scripts": {
-    "build": "node scripts/build-client.js"
+    "build": "node scripts/build-client.js",
+    "test": "node test/window-spec.test.js && node test/platform.test.js && node test/host-half.test.js && node test/client-bundle.test.js && node test/scripts-parse.test.js && node test/docs-upkeep.test.js"
   },
   "devDependencies": {
     "esbuild": "^0.25.0"

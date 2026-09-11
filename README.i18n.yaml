@@ -2,5 +2,14 @@
 # side as of the last confirmed-consistent state. Both languages
 # carry equal authority; after editing either side, bring the
 # other along and re-record the hashes (git hash-object <file>).
-README.md: 07902f6a92d677afe1e23935625db4bc2444e404
-README.zh.md: e19f1945d87c4881fcefd078cdc6cb80b9d4e09f
+#
+# DEVELOPMENT.md and ADAPTATION.md carry a mandatory-upkeep clause:
+# every change to this project must update them. test/docs-upkeep.test.js
+# fails when a document is missing that clause, when a pair link is
+# missing, or when a hash below is stale.
+README.md: f5e544d3aacc4c000b780997695803c4cf813bbb
+README.zh.md: 369edbf7b34f62549c05bc8a11a738280213b671
+DEVELOPMENT.md: c090b66429a655814d117c3b14e90494c03d76ed
+DEVELOPMENT.zh.md: cd4d1cc4ba0b11788c4d9b916bf25a7c23954214
+ADAPTATION.md: da20e8cd5717f2527df1853e8ff6f71c9ebdf2d1
+ADAPTATION.zh.md: 5a02505b6eec971e1d53df8358088092c175e124

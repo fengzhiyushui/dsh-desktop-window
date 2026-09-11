@@ -1,0 +1,10 @@
+# Keep the shipped browser bundle out of diffs: it is a build artifact, but it
+# must stay committed (installers never run a build), so mark it generated.
+lib/client.js linguist-generated=true
+
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary assets: never try to diff or merge them as text.
+*.png binary
+*.ico binary

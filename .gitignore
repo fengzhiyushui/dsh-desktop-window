@@ -4,3 +4,7 @@ node_modules/
 .claude/
 .edge-headless*/
 lib/client.raw.js
+
+# Local DSH source, kept only as a reference for adapting to new DSH releases.
+# Never committed, never built, and never run from this repository.
+dsh/

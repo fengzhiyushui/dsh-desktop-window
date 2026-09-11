@@ -2,127 +2,178 @@
 
 [中文](README.zh.md) | English
 
-DSH desktop-window plugin: opens the DeepSeek Harness Web UI in a **standalone app window** (Edge/Chrome `--app` mode) — double-click to launch, auto-popup, no address bar, fully isolated from your everyday browser.
+A [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (DSH) plugin that opens the DSH Web UI in a **standalone app window** — double-click to launch, no tab strip, no address bar, and a browser profile fully isolated from your everyday browsing.
+
+```text
+dsh web  ──▶  server ready  ──▶  ┌──────────────────────────┐
+                                 │  DSH · standalone window │
+                                 │  (Edge/Chrome --app)     │
+                                 └──────────────────────────┘
+```
 
 ## Features
 
-- **Auto-open**: once `dsh web` boots and the server is ready, a standalone app window pops up automatically (enabled by default);
-- **Manual toggle**: an "独立窗口" (Standalone Window) button in the session header action row opens/closes the window;
-- **Settings toggle**: Settings → General → "启动时自动打开独立窗口" (auto-open at startup), persisted to `$DSH_HOME/desktop-window.json` (BOM-tolerant, so Notepad edits are safe);
-- **Whale icon**: injects the official DeepSeek whale favicon (16/32/64/128/256) plus a web manifest (192/512) — the window title bar shows the whale; the taskbar icon is best-effort via an icon helper (see Known limitations);
-- **Security**: mutation routes are same-origin guarded (cross-site POST → 403); the window uses a dedicated profile directory under TEMP, fully isolated from your normal Edge/Chrome profile;
-- **Lifecycle**: window-close state syncs automatically; on plugin unload the window process tree, icon helper and all routes are cleaned up.
+- **Auto-open** — the window appears by itself once the server is up (on by default).
+- **Manual toggle** — a window button in the session header opens and closes it.
+- **Settings switch** — *Settings → General → auto-open at startup*, persisted across restarts.
+- **Whale branding** — the official whale favicon and a web manifest are injected, so the window title bar and an installed app carry the DeepSeek icon.
+- **Isolated** — a dedicated profile directory under `%TEMP%`; your normal Edge/Chrome windows, tabs, and logins are untouched.
+
+| | |
+|---|---|
+| Standalone window | Chromium `--app` mode: no tabs, no address bar, 1440×900 launch size |
+| Auto-open | A settled first paint instead of a blank frame |
+| Header button | Shows live window state and toggles it |
+| Settings row | A compact switch in the General section of Settings |
+| Whale icon | 7 favicon sizes plus a web manifest, injected as `<head>` rows |
+| Safety | Mutating routes are same-origin guarded (cross-site `POST` → `403`); every route, timer, and child process is released on plugin unload |
+| Lifecycle | Window-close state stays in sync; closing tears down the whole process tree |
+
+## Requirements
+
+| | |
+|---|---|
+| OS | Windows 10/11 (primary), macOS 11+ | Linux shares the same code path and is untested |
+| DSH | `>= 0.1.0-rc.6` — developed and verified against **0.1.5-rc.1** |
+| Node.js | `>= 22` (inherited from DSH) |
+| Browser | Edge, Chrome, Chromium, Brave, or Vivaldi at a standard install location |
+| pnpm | only for `dsh plugin add` / `update` (`npm install -g pnpm`) |
+
+The window logic itself is cross-platform; only Windows is a supported target today.
 
 ## Installation
 
-Prerequisites: DSH installed (`dsh` on PATH) and pnpm (`dsh plugin` shells out to pnpm; `npm install -g pnpm` if missing).
+> Installing a bundle changes the profile's bundle list, which DSH reads **at startup** — so `dsh web` must be restarted afterwards.
 
-**From GitHub (recommended):**
+**From GitHub:**
 
 ```sh
-dsh plugin --profile web add github:<your-name>/dsh-desktop-window
-# or
-dsh plugin --profile web add "git+https://github.com/<your-name>/dsh-desktop-window.git"
+dsh plugin --profile web add github:fengzhiyushui/dsh-desktop-window
+# equivalent:
+dsh plugin --profile web add "git+https://github.com/fengzhiyushui/dsh-desktop-window.git"
 ```
 
-**From a local directory:**
+**From a local checkout:**
 
 ```sh
 dsh plugin --profile web add "file:D:/path/to/dsh-desktop-window"
 ```
 
-> **Windows path-with-spaces gotcha**: `dsh plugin` forwards arguments to pnpm through a shell, and paths
-> containing spaces get re-split, producing `ERR_PNPM_SPEC_NOT_SUPPORTED_BY_ANY_RESOLVER`.
-> Workaround: create a space-free junction and install from there:
->
-> ```powershell
-> New-Item -ItemType Junction -Path D:\dsh-desktop-window -Target 'D:\path with spaces\dsh-desktop-window'
-> dsh plugin --profile web add "file:D:/dsh-desktop-window"
-> ```
+`dsh plugin add` installs the package into the profile's `node_modules` and merges the bundle that declares `dsh.bundle` into `dsh.profile.bundles` automatically — no manual config edits. Then **restart `dsh web`**.
 
-`dsh plugin add` installs the package into the profile's node_modules and automatically merges the
-`dsh.bundle`-declaring package into `dsh.profile.bundles` — no manual config edits. **Restart `dsh web`** after installing.
+Or let the script do all of it (pnpm check, space-safe install, composition check):
 
-## Updating
+```powershell
+powershell -ExecutionPolicy Bypass -File "<plugin-dir>\scripts\install.ps1"
+```
+
+<details>
+<summary><b>Windows: installing from a path that contains spaces</b></summary>
+
+`dsh plugin` forwards arguments to pnpm through a shell, and a path with spaces
+gets re-split into separate arguments. Install through a space-free junction
+instead — `scripts/install.ps1` does this for you, or by hand:
+
+```powershell
+New-Item -ItemType Junction -Path D:\dsh-desktop-window -Target 'D:\path with spaces\dsh-desktop-window'
+dsh plugin --profile web add "file:D:/dsh-desktop-window"
+```
+</details>
+
+### Keeping it up to date
 
 ```sh
-# update to the latest release (git deps re-fetch the default branch HEAD)
+# a git dependency re-fetches the default branch HEAD
 dsh plugin --profile web update dsh-desktop-window
-
 # then restart dsh web
 ```
 
-Release process: see [CHANGELOG.md](CHANGELOG.md). Users never need to re-`add`; a plain `update` is enough.
+Users never need to re-`add`; `update` is enough.
 
 ## Usage
 
 ```sh
 dsh web
-# a standalone app window pops up once the server is ready
+# the standalone app window opens by itself once the server is ready
 ```
 
-- "独立窗口" button in the session header: open/close the window;
-- Settings → General: turn auto-open on/off;
-- Browser choice: Edge first, Chrome as fallback (both use the `--app` window mode with identical flags).
-  To change the preference order, edit `BROWSER_CANDIDATES` in `lib/index.js`.
+| What | Where |
+|---|---|
+| Open / close the window | the window button in the session header |
+| Turn auto-open on or off | Settings → General → auto-open at startup |
+| Change the browser preference | edit `browserCandidates()` in `lib/window-spec.js` |
 
-## Desktop shortcut (Windows)
+Closing the app window does **not** stop `dsh` — by design, only the standalone window closes.
 
-One-liner (targets `DSH-Desktop.cmd`, whale icon):
+### Desktop shortcut (Windows)
 
 ```powershell
+# whale icon, opens with this plugin folder as the workspace
 powershell -ExecutionPolicy Bypass -File "<plugin-dir>\scripts\create-shortcut.ps1"
-# with a default workspace:
+
+# with a specific default workspace
 powershell -ExecutionPolicy Bypass -File "<plugin-dir>\scripts\create-shortcut.ps1" -WorkspaceDir "D:\my project"
 ```
 
-You can also just double-click `DSH-Desktop.cmd` (uses the global `dsh` when present, falls back to npx).
+`DSH-Desktop.cmd` is the launcher the shortcut points at; you can also double-click it. It uses `dsh` when it is on `PATH` and otherwise falls back to `npx @deepseek-ai/dsh@latest` (pin it with the `DSH_DESKTOP_DSH_VERSION` environment variable).
 
-## Platforms
+## Configuration
 
-Windows first (window-close relies on `taskkill`; the taskbar icon helper relies on PowerShell). On
-macOS/Linux auto-open and the button work, but closing degrades to killing the main process only.
+The auto-open preference lives in `$DSH_HOME/desktop-window.json` (default `%USERPROFILE%\.dsh\desktop-window.json`). It is written by the settings switch; a hand-edit is also fine, including one saved by Notepad (a UTF-8 BOM is tolerated).
 
-## Development & build
-
-`lib/client.js` is the browser-side bundle (the built artifact is committed, so installers never build). Two rules matter:
-
-- **react must stay external**: official client bundles `require("react")` against the module-table seed word
-  (the shared React registered by the shell kernel); bundling it in creates a second React and breaks Hooks;
-- **the `__ModuleLoader__.load` registration shell is mandatory**: bare CJS output is not recognized by the module table.
-
-Rebuild:
-
-```sh
-npm install          # esbuild + react (dev deps)
-npm run build        # node scripts/build-client.js
+```json
+{
+  "autoOpen": true,
+  "cleanProfileOnUnload": false
+}
 ```
 
-## Layout
+| Key | Default | Meaning |
+|---|---|---|
+| `autoOpen` | `true` | Open the standalone window when the server starts |
+| `cleanProfileOnUnload` | `false` | Delete the dedicated browser profile directory when the plugin unloads. Left `false`, the profile is kept so the window starts warm |
 
-```
-package.json             dual-face declaration (dsh.bundle + dsh.client)
-cordis.patch.yml         composition layer (one row: desktop-window)
-lib/index.js             Host half: window process + HTTP routes + icon/manifest injection + state persistence
-lib/client.js            browser bundle (built artifact, committed)
-src/client.js            client source (React)
-scripts/build-client.js  build script (esbuild + registration shell)
-scripts/set-window-icon.ps1  taskbar icon helper (WM_SETICON + custom AppUserModelID)
-scripts/install.ps1      one-shot installer
-scripts/create-shortcut.ps1   one-shot desktop shortcut
-DSH-Desktop.cmd          double-click launcher
-assets/                  official DeepSeek whale icon (SVG / multi-size PNG / ICO)
-```
+### HTTP endpoints
+
+The plugin's browser half talks to these routes; they are also usable from scripts. Mutating routes reject a cross-site `Origin` with `403` and bodies larger than 4 KB.
+
+| Route | Method | Purpose |
+|---|---|---|
+| `/desktop-window/status` | `GET`/`POST` | `{ open, auto }` |
+| `/desktop-window/toggle` | `POST` | Open the window, or close it when open |
+| `/desktop-window/set-auto` | `POST` | `{ auto: boolean }` → persists the preference |
+| `/desktop-window/manifest.webmanifest` | `GET` | The injected web manifest |
+| `/desktop-window/<icon>.png` | `GET` | Served icon bytes |
+
+## Platform support
+
+| Platform | Auto-open & button | Closing the window | Notes |
+|---|---|---|---|
+| Windows 10/11 | yes | full process-tree teardown (`taskkill /T /F`) | primary target |
+| macOS | yes | SIGTERM, escalating to SIGKILL after 2 s | Chrome, Edge, Chromium, Brave, Vivaldi, in `/Applications` and `~/Applications` |
+| Linux | yes | SIGTERM, escalating to SIGKILL after 2 s | Chrome, Edge, Chromium, Brave from the usual `/usr/bin` and `/bin` locations |
+
+Every platform launches the same Chromium `--app` window; only browser discovery and
+process teardown differ. Windows and macOS have dedicated code paths covered by tests;
+Linux shares the POSIX path but has not been exercised on a real machine.
 
 ## Known limitations
 
-- **Windows taskbar button icon**: the title bar shows the whale (favicon/manifest take effect), but the taskbar
-  button still shows the default icon on some Edge versions — the helper tries WM_SETICON + a custom
-  AppUserModelID with varying success. For a guaranteed whale taskbar icon, use "Edge menu → Apps → Install
-  this site as an app" once (it consumes the manifest this plugin injects).
-- Closing the app window does not quit the `dsh` process (by design: only the standalone window closes).
-- The auto-open toggle lives in `$DSH_HOME/desktop-window.json`; a future version may migrate it to the settings service.
+- **The taskbar or Dock icon shows the browser, not the whale.** The window is Chromium in `--app` mode, so Windows groups its taskbar button under Edge/Chrome and shows the browser icon there, and macOS likewise shows the browser in the Dock. The title bar, the tab icon, and Alt+Tab / ⌘-Tab use the injected favicon. For the whale everywhere, install the page as an app: **Edge menu → Apps → Install this site as an app**, or in Chrome **⋮ → Cast, save, and share → Install page as app** (macOS: **⋮ → Save and share → Install page as app**). Both consume the manifest this plugin injects.
+- **Closing the window does not quit `dsh`** — by design.
+- **This is a browser window**, not an embedded webview.
+- **The dedicated profile persists** under the platform temporary directory (`%TEMP%\dsh-desktop-window` on Windows, `$TMPDIR/dsh-desktop-window` on macOS), which is why the window starts warm. Set `cleanProfileOnUnload` to `true` to remove it on unload.
+- **Opening the window does not authenticate it.** Mutating routes reject cross-site browser requests, but a local non-browser process is not challenged.
+
+## Development
+
+Development rules, build details, and the version-adaptation checklist are separate documents:
+
+- [DEVELOPMENT.md](DEVELOPMENT.md) — architecture, build, test strategy, release process;
+- [ADAPTATION.md](ADAPTATION.md) — the DSH compatibility matrix and what to re-verify on a new DSH release.
+
+> **Both documents must be updated with every change to this project.**
 
 ## License
 
-MIT
+[MIT](LICENSE)

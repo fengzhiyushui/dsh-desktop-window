@@ -1,7 +1,10 @@
-﻿# 创建「DSH 桌面窗口」桌面快捷方式（鲸鱼图标）
-# 用法（在 PowerShell 中运行）：
-#   powershell -ExecutionPolicy Bypass -File "D:\person studio\dsh\1\dsh-desktop-window\scripts\create-shortcut.ps1"
-# 可选参数：目标工作区目录（快捷方式启动后的默认会话工作区）
+# Create the "DSH Desktop Window" desktop shortcut (whale icon).
+# Run from any directory; paths are derived from this script's own location:
+#
+#   powershell -ExecutionPolicy Bypass -File "<plugin-dir>\scripts\create-shortcut.ps1"
+#
+# Optional: -WorkspaceDir <dir> sets the default session workspace the shortcut
+# opens in. Without it, the shortcut uses this plugin folder as the workspace.
 
 param(
   [string]$WorkspaceDir = ""
@@ -13,27 +16,27 @@ $pluginDir = Split-Path -Parent $PSScriptRoot
 $launcher  = Join-Path $pluginDir 'DSH-Desktop.cmd'
 $iconPath  = Join-Path $pluginDir 'assets\icon.ico'
 
-if (-not (Test-Path $launcher)) { throw "未找到启动器：$launcher" }
-if (-not (Test-Path $iconPath)) { throw "未找到图标：$iconPath" }
+if (-not (Test-Path -LiteralPath $launcher)) { throw "launcher not found: $launcher" }
+if (-not (Test-Path -LiteralPath $iconPath)) { throw "icon not found: $iconPath" }
 
-$target = '"' + $launcher + '"'
 if ($WorkspaceDir -ne '') {
-  $full = (Resolve-Path $WorkspaceDir).Path
-  $target = $target + ' "' + $full + '"'
+  if (-not (Test-Path -LiteralPath $WorkspaceDir)) { throw "workspace not found: $WorkspaceDir" }
+  $WorkspaceDir = (Resolve-Path -LiteralPath $WorkspaceDir).Path
 }
 
 $desktop = [Environment]::GetFolderPath('Desktop')
-$lnkPath = Join-Path $desktop 'DSH 桌面窗口.lnk'
+$lnkPath = Join-Path $desktop 'DSH Desktop Window.lnk'
 
 $shell = New-Object -ComObject WScript.Shell
 $shortcut = $shell.CreateShortcut($lnkPath)
 $shortcut.TargetPath = $launcher
-if ($WorkspaceDir -ne '') { $shortcut.Arguments = '"' + $full + '"' }
+if ($WorkspaceDir -ne '') { $shortcut.Arguments = '"' + $WorkspaceDir + '"' }
 $shortcut.WorkingDirectory = $pluginDir
 $shortcut.IconLocation = $iconPath + ',0'
-$shortcut.Description = 'DeepSeek Harness 桌面窗口（自动以独立应用窗口打开）'
+$shortcut.Description = 'DeepSeek Harness desktop window (opens as a standalone app window)'
 $shortcut.Save()
 
-Write-Output ("快捷方式已创建：$lnkPath")
-Write-Output ('目标：' + $target)
-Write-Output ('图标：' + $iconPath)
+Write-Output ("Shortcut created: $lnkPath")
+Write-Output ("Target:  $launcher")
+if ($WorkspaceDir -ne '') { Write-Output ("Arguments: `"$WorkspaceDir`"") }
+Write-Output ("Icon:    $iconPath")
