@@ -1,3 +1,10 @@
+# Check files out byte-for-byte. Without this, `core.autocrlf=true` (the Windows
+# default) rewrites every LF to CRLF on checkout, so a fresh clone differs from
+# the committed bytes and `test/docs-upkeep.test.js` — which hashes the working
+# tree against `README.i18n.yaml` — fails on the contributor's machine but passes
+# on the author's, where the files never went through a checkout.
+* -text
+
 # Keep the shipped browser bundle out of diffs: it is a build artifact, but it
 # must stay committed (installers never run a build), so mark it generated.
 lib/client.js linguist-generated=true
